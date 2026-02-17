@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Year of the Horse 2026 - Lunar New Year Runner</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  body {
+    background: #1a0a2e;
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    touch-action: manipulation;
+  }
+
+  #gameContainer {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  #startScreen {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    background: linear-gradient(180deg, #1a0a2e 0%, #2d1052 50%, #1a0a2e 100%);
+  }
+
+  #startScreen h1 {
+    color: #ffd700;
+    font-size: clamp(28px, 6vw, 56px);
+    text-align: center;
+    text-shadow: 0 0 20px #ff6600, 0 0 40px #ff3300;
+    margin-bottom: 10px;
+    line-height: 1.2;
+  }
+
+  #startScreen .subtitle {
+    color: #ff6b35;
+    font-size: clamp(16px, 3vw, 28px);
+    margin-bottom: 30px;
+    text-shadow: 0 0 10px #ff6600;
+  }
+
+  #startScreen .horse-art {
+    font-size: clamp(60px, 15vw, 120px);
+    margin-bottom: 20px;
+    animation: bounce 1.5s ease-in-out infinite;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+
+  #startScreen .instructions {
+    color: #ffcc80;
+    font-size: clamp(14px, 2.5vw, 20px);
+    text-align: center;
+    margin-bottom: 20px;
+    line-height: 1.6;
+    padding: 0 20px;
+  }
+
+  #startScreen .obstacles-info {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: clamp(8px, 2vw, 16px);
+    margin-bottom: 25px;
+    padding: 0 15px;
+    max-width: 500px;
+  }
+
+  #startScreen .obstacle-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,215,0,0.25);
+    border-radius: 12px;
+    padding: clamp(6px, 1.5vw, 12px) clamp(10px, 2vw, 18px);
+    min-width: clamp(65px, 15vw, 95px);
+  }
+
+  #startScreen .obstacle-item .obs-icon {
+    font-size: clamp(22px, 5vw, 36px);
+    margin-bottom: 4px;
+  }
+
+  #startScreen .obstacle-item .obs-label {
+    color: #ffcc80;
+    font-size: clamp(10px, 1.8vw, 13px);
+    white-space: nowrap;
+  }
+
+  #startScreen .coin-hint {
+    color: #ffd700;
+    font-size: clamp(12px, 2.2vw, 16px);
+    margin-bottom: 20px;
+    text-shadow: 0 0 8px rgba(255,215,0,0.4);
+  }
+
+  #startBtn {
+    background: linear-gradient(135deg, #ff6b35, #d4380d);
+    color: #fff;
+    border: 3px solid #ffd700;
+    padding: 15px 50px;
+    font-size: clamp(18px, 3vw, 26px);
+    border-radius: 50px;
+    cursor: pointer;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    box-shadow: 0 0 20px rgba(255,107,53,0.5), 0 5px 15px rgba(0,0,0,0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(255,107,53,0.5); }
+    50% { box-shadow: 0 0 40px rgba(255,107,53,0.8), 0 0 60px rgba(255,215,0,0.3); }
+  }
+
+  #startBtn:hover, #startBtn:active {
+    transform: scale(1.05);
+  }
+
+  #gameOverScreen {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    background: rgba(26, 10, 46, 0.9);
+  }
+
+  #gameOverScreen h2 {
+    color: #ff4444;
+    font-size: clamp(32px, 7vw, 60px);
+    text-shadow: 0 0 20px #ff0000;
+    margin-bottom: 10px;
+  }
+
+  #gameOverScreen .final-score {
+    color: #ffd700;
+    font-size: clamp(22px, 4vw, 40px);
+    margin-bottom: 10px;
+  }
+
+  #gameOverScreen .high-score {
+    color: #ffcc80;
+    font-size: clamp(16px, 3vw, 24px);
+    margin-bottom: 30px;
+  }
+
+  #restartBtn {
+    background: linear-gradient(135deg, #ff6b35, #d4380d);
+    color: #fff;
+    border: 3px solid #ffd700;
+    padding: 15px 50px;
+    font-size: clamp(18px, 3vw, 26px);
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(255,107,53,0.5);
+  }
+
+  #scoreDisplay {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    color: #ffd700;
+    font-size: clamp(18px, 3.5vw, 32px);
+    font-weight: bold;
+    text-shadow: 0 0 10px #ff6600;
+    z-index: 5;
+  }
+
+  #highScoreDisplay {
+    position: absolute;
+    top: 15px;
+    left: 20px;
+    color: #ffcc80;
+    font-size: clamp(14px, 2.5vw, 22px);
+    z-index: 5;
+    opacity: 0.8;
+  }
+
+  #muteBtn {
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 15;
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,215,0,0.4);
+    color: #ffd700;
+    font-size: clamp(20px, 4vw, 30px);
+    width: clamp(40px, 8vw, 55px);
+    height: clamp(40px, 8vw, 55px);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    transition: background 0.2s, transform 0.15s;
+    line-height: 1;
+  }
+
+  #muteBtn:hover { background: rgba(255,255,255,0.18); }
+  #muteBtn:active { transform: translateX(-50%) scale(0.9); }
+
+  #tapHint {
+    position: absolute;
+    bottom: clamp(15px, 4vh, 30px);
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255,204,128,0.6);
+    font-size: clamp(13px, 2.5vw, 18px);
+    z-index: 5;
+    pointer-events: none;
+    animation: fadeInOut 3s ease-in-out forwards;
+    white-space: nowrap;
+  }
+
+  @keyframes fadeInOut {
+    0% { opacity: 0; }
+    15% { opacity: 1; }
+    70% { opacity: 1; }
+    100% { opacity: 0; display: none; }
+  }
+
+  .lantern {
+    position: absolute;
+    font-size: clamp(20px, 4vw, 40px);
+    animation: sway 3s ease-in-out infinite;
+    opacity: 0.6;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  @keyframes sway {
+    0%, 100% { transform: rotate(-5deg); }
+    50% { transform: rotate(5deg); }
+  }
+</style>
+</head>
+<body>
+<div id="gameContainer">
+  <canvas id="gameCanvas"></canvas>
+
+  <button id="muteBtn" title="Toggle Sound">🔊</button>
+  <div id="tapHint" style="display:none;">👆 Tap anywhere to jump!</div>
+  <div id="scoreDisplay" style="display:none;">Score: <span id="score">0</span></div>
+  <div id="highScoreDisplay" style="display:none;">Best: <span id="highScore">0</span></div>
+
+  <div id="startScreen">
+    <div class="horse-art">🐴</div>
+    <h1>Year of the Horse</h1>
+    <div class="subtitle">🏮 Lunar New Year 2026 🏮</div>
+    <div class="instructions" id="controlsHint">
+      Press <b>SPACE</b> or <b>TAP</b> to jump!<br>
+      Dodge the obstacles &amp; grab lucky coins!
+    </div>
+    <div class="obstacles-info">
+      <div class="obstacle-item">
+        <span class="obs-icon">🧨</span>
+        <span class="obs-label">Firecracker</span>
+      </div>
+      <div class="obstacle-item">
+        <span class="obs-icon">🥁</span>
+        <span class="obs-label">Drum</span>
+      </div>
+      <div class="obstacle-item">
+        <span class="obs-icon">🦁</span>
+        <span class="obs-label">Lion Dance</span>
+      </div>
+      <div class="obstacle-item">
+        <span class="obs-icon">🏮</span>
+        <span class="obs-label">Lantern</span>
+      </div>
+    </div>
+    <div class="coin-hint">💰 Collect lucky coins for +25 bonus!</div>
+    <button id="startBtn">🎆 START 🎆</button>
+  </div>
+
+  <div id="gameOverScreen">
+    <h2>Game Over!</h2>
+    <div class="final-score">Score: <span id="finalScore">0</span></div>
+    <div class="high-score">Best: <span id="finalHighScore">0</span></div>
+    <button id="restartBtn">🎆 Play Again 🎆</button>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+// Responsive canvas
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+// Game constants (responsive)
+function getScale() {
+  return Math.min(canvas.width / 800, canvas.height / 400, 1.5);
+}
+
+// ==================== AUDIO ENGINE ====================
+let audioCtx = null;
+let isMuted = false;
+let musicGain = null;
+let sfxGain = null;
+let bgMusicInterval = null;
+let currentMelodyStep = 0;
+
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  // Master gains
+  musicGain = audioCtx.createGain();
+  musicGain.gain.value = 0.25;
+  musicGain.connect(audioCtx.destination);
+
+  sfxGain = audioCtx.createGain();
+  sfxGain.gain.value = 0.4;
+  sfxGain.connect(audioCtx.destination);
+
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+}
+
+function toggleMute() {
+  isMuted = !isMuted;
+  document.getElementById('muteBtn').textContent = isMuted ? '🔇' : '🔊';
+  if (audioCtx) {
+    musicGain.gain.value = isMuted ? 0 : 0.25;
+    sfxGain.gain.value = isMuted ? 0 : 0.4;
+  }
+}
+
+document.getElementById('muteBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  toggleMute();
+});
+
+// --- Chinese pentatonic scale: C D E G A (various octaves) ---
+// Frequencies for a festive pentatonic melody
+const PENTA = {
+  C4: 261.63, D4: 293.66, E4: 329.63, G4: 392.00, A4: 440.00,
+  C5: 523.25, D5: 587.33, E5: 659.25, G5: 783.99, A5: 880.00,
+  C6: 1046.50,
+};
+
+// Melody pattern — a looping festive Chinese-style tune
+const melody = [
+  // Phrase 1 — ascending celebratory
+  { note: PENTA.E4, dur: 0.18 },
+  { note: PENTA.G4, dur: 0.18 },
+  { note: PENTA.A4, dur: 0.25 },
+  { note: PENTA.C5, dur: 0.35 },
+  { note: 0, dur: 0.1 },  // rest
+  { note: PENTA.A4, dur: 0.18 },
+  { note: PENTA.C5, dur: 0.18 },
+  { note: PENTA.D5, dur: 0.25 },
+  { note: PENTA.E5, dur: 0.35 },
+  { note: 0, dur: 0.15 },
+  // Phrase 2 — playful descending
+  { note: PENTA.E5, dur: 0.18 },
+  { note: PENTA.D5, dur: 0.18 },
+  { note: PENTA.C5, dur: 0.25 },
+  { note: PENTA.A4, dur: 0.25 },
+  { note: PENTA.G4, dur: 0.35 },
+  { note: 0, dur: 0.1 },
+  { note: PENTA.A4, dur: 0.18 },
+  { note: PENTA.G4, dur: 0.18 },
+  { note: PENTA.E4, dur: 0.35 },
+  { note: 0, dur: 0.2 },
+  // Phrase 3 — bouncy repeated motif
+  { note: PENTA.C5, dur: 0.15 },
+  { note: PENTA.D5, dur: 0.15 },
+  { note: PENTA.E5, dur: 0.15 },
+  { note: PENTA.G5, dur: 0.3 },
+  { note: PENTA.E5, dur: 0.15 },
+  { note: PENTA.D5, dur: 0.15 },
+  { note: PENTA.C5, dur: 0.3 },
+  { note: 0, dur: 0.1 },
+  // Phrase 4 — ending flourish
+  { note: PENTA.G4, dur: 0.15 },
+  { note: PENTA.A4, dur: 0.15 },
+  { note: PENTA.C5, dur: 0.15 },
+  { note: PENTA.E5, dur: 0.15 },
+  { note: PENTA.G5, dur: 0.4 },
+  { note: PENTA.E5, dur: 0.2 },
+  { note: PENTA.C5, dur: 0.5 },
+  { note: 0, dur: 0.3 },
+];
+
+function playNote(freq, duration, dest, type = 'triangle', vibrato = true) {
+  if (!audioCtx || freq === 0) return;
+  const osc = audioCtx.createOscillator();
+  const env = audioCtx.createGain();
+
+  osc.type = type;
+  osc.frequency.value = freq;
+
+  // Subtle vibrato for that erhu/Chinese instrument feel
+  if (vibrato) {
+    const lfo = audioCtx.createOscillator();
+    const lfoGain = audioCtx.createGain();
+    lfo.frequency.value = 5.5;
+    lfoGain.gain.value = freq * 0.008;
+    lfo.connect(lfoGain);
+    lfoGain.connect(osc.frequency);
+    lfo.start(audioCtx.currentTime);
+    lfo.stop(audioCtx.currentTime + duration + 0.05);
+  }
+
+  // Envelope: quick attack, sustain, gentle release
+  const now = audioCtx.currentTime;
+  env.gain.setValueAtTime(0, now);
+  env.gain.linearRampToValueAtTime(0.6, now + 0.03);
+  env.gain.setValueAtTime(0.6, now + duration * 0.6);
+  env.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+  osc.connect(env);
+  env.connect(dest);
+  osc.start(now);
+  osc.stop(now + duration + 0.01);
+}
+
+// Background percussion — a light steady beat
+function playBeat(dest) {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  // Woodblock-like click using filtered noise
+  const bufferSize = audioCtx.sampleRate * 0.04;
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 10);
+  }
+  const src = audioCtx.createBufferSource();
+  src.buffer = buffer;
+
+  const filt = audioCtx.createBiquadFilter();
+  filt.type = 'bandpass';
+  filt.frequency.value = 1800;
+  filt.Q.value = 5;
+
+  const env = audioCtx.createGain();
+  env.gain.setValueAtTime(0.5, now);
+  env.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+
+  src.connect(filt);
+  filt.connect(env);
+  env.connect(dest);
+  src.start(now);
+}
+
+let beatCounter = 0;
+function startMusic() {
+  if (bgMusicInterval) return;
+  currentMelodyStep = 0;
+  beatCounter = 0;
+
+  // Schedule notes in a loop
+  let nextNoteTime = 0;
+  function scheduleNext() {
+    if (gameState !== 'playing' || !audioCtx) {
+      bgMusicInterval = null;
+      return;
+    }
+    const step = melody[currentMelodyStep];
+    if (step.note > 0) {
+      playNote(step.note, step.dur, musicGain, 'triangle', true);
+      // Harmony: a quiet octave below
+      playNote(step.note * 0.5, step.dur * 1.1, musicGain, 'sine', false);
+    }
+
+    // Beat every 2 melody steps
+    beatCounter++;
+    if (beatCounter % 2 === 0) {
+      playBeat(musicGain);
+    }
+
+    currentMelodyStep = (currentMelodyStep + 1) % melody.length;
+    const interval = step.dur * 1000;
+    bgMusicInterval = setTimeout(scheduleNext, interval);
+  }
+  scheduleNext();
+}
+
+function stopMusic() {
+  if (bgMusicInterval) {
+    clearTimeout(bgMusicInterval);
+    bgMusicInterval = null;
+  }
+}
+
+// --- Sound Effects ---
+function sfxJump() {
+  if (!audioCtx) return;
+  // Quick rising "boing"
+  const osc = audioCtx.createOscillator();
+  const env = audioCtx.createGain();
+  osc.type = 'sine';
+  const now = audioCtx.currentTime;
+  osc.frequency.setValueAtTime(280, now);
+  osc.frequency.exponentialRampToValueAtTime(560, now + 0.12);
+  env.gain.setValueAtTime(0.35, now);
+  env.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+  osc.connect(env);
+  env.connect(sfxGain);
+  osc.start(now);
+  osc.stop(now + 0.2);
+}
+
+function sfxCoin() {
+  if (!audioCtx) return;
+  // Sparkly coin chime — two quick high notes
+  const now = audioCtx.currentTime;
+  [PENTA.E5, PENTA.A5].forEach((freq, i) => {
+    const osc = audioCtx.createOscillator();
+    const env = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    const t = now + i * 0.08;
+    env.gain.setValueAtTime(0, t);
+    env.gain.linearRampToValueAtTime(0.4, t + 0.02);
+    env.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+    osc.connect(env);
+    env.connect(sfxGain);
+    osc.start(t);
+    osc.stop(t + 0.26);
+  });
+}
+
+function sfxScore() {
+  if (!audioCtx) return;
+  // Quick celebratory arpeggio for passing obstacles
+  const now = audioCtx.currentTime;
+  const notes = [PENTA.C5, PENTA.E5];
+  notes.forEach((freq, i) => {
+    const osc = audioCtx.createOscillator();
+    const env = audioCtx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.value = freq;
+    const t = now + i * 0.06;
+    env.gain.setValueAtTime(0.2, t);
+    env.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+    osc.connect(env);
+    env.connect(sfxGain);
+    osc.start(t);
+    osc.stop(t + 0.16);
+  });
+}
+
+function sfxMilestone() {
+  if (!audioCtx) return;
+  // Big fanfare for every 100 points
+  const now = audioCtx.currentTime;
+  const fanfare = [PENTA.C5, PENTA.E5, PENTA.G5, PENTA.C6];
+  fanfare.forEach((freq, i) => {
+    const osc = audioCtx.createOscillator();
+    const env = audioCtx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.value = freq;
+    const t = now + i * 0.1;
+    env.gain.setValueAtTime(0, t);
+    env.gain.linearRampToValueAtTime(0.35, t + 0.03);
+    env.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+    osc.connect(env);
+    env.connect(sfxGain);
+    osc.start(t);
+    osc.stop(t + 0.36);
+  });
+}
+
+function sfxGameOver() {
+  if (!audioCtx) return;
+  // Descending sad tones
+  const now = audioCtx.currentTime;
+  const notes = [PENTA.E5, PENTA.C5, PENTA.A4, PENTA.E4];
+  notes.forEach((freq, i) => {
+    const osc = audioCtx.createOscillator();
+    const env = audioCtx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.value = freq;
+    const t = now + i * 0.2;
+    env.gain.setValueAtTime(0, t);
+    env.gain.linearRampToValueAtTime(0.3, t + 0.03);
+    env.gain.setValueAtTime(0.3, t + 0.12);
+    env.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+    osc.connect(env);
+    env.connect(sfxGain);
+    osc.start(t);
+    osc.stop(t + 0.36);
+  });
+}
+
+// ==================== END AUDIO ====================
+
+// Game state
+let gameState = 'start'; // start, playing, over
+let score = 0;
+let highScore = parseInt(localStorage.getItem('lunarHorseHighScore') || '0');
+let frameCount = 0;
+let gameSpeed = 5;
+let groundY;
+let lastTimestamp = 0;
+
+// Horse
+const horse = {
+  x: 0,
+  y: 0,
+  width: 0,
+  height: 0,
+  velocityY: 0,
+  isJumping: false,
+  jumpForce: -14,
+  gravity: 0.65,
+  animFrame: 0,
+  animTimer: 0,
+};
+
+// Arrays
+let obstacles = [];
+let coins = [];
+let particles = [];
+let bgElements = [];
+let groundTiles = [];
+
+// Obstacle types
+const OBSTACLE_TYPES = {
+  FIRECRACKER: 'firecracker',
+  DRUM: 'drum',
+  LION: 'lion',
+  LANTERN_LOW: 'lantern_low',
+};
+
+function initGame() {
+  const scale = getScale();
+  groundY = canvas.height - 60 * scale;
+
+  horse.width = 60 * scale;
+  horse.height = 55 * scale;
+  horse.x = 80 * scale;
+  horse.y = groundY - horse.height;
+  horse.velocityY = 0;
+  horse.isJumping = false;
+  horse.jumpForce = -14 * scale;
+  horse.gravity = 0.65 * scale;
+
+  obstacles = [];
+  coins = [];
+  particles = [];
+  bgElements = [];
+  groundTiles = [];
+  score = 0;
+  gameSpeed = 5 * scale;
+  frameCount = 0;
+
+  // Init background lanterns
+  for (let i = 0; i < 5; i++) {
+    bgElements.push({
+      x: Math.random() * canvas.width,
+      y: 20 + Math.random() * (canvas.height * 0.3),
+      speed: 0.3 + Math.random() * 0.5,
+      type: Math.random() > 0.5 ? 'lantern' : 'firework',
+      size: (15 + Math.random() * 20) * scale,
+      alpha: 0.3 + Math.random() * 0.4,
+      sway: Math.random() * Math.PI * 2,
+    });
+  }
+
+  document.getElementById('score').textContent = '0';
+  document.getElementById('highScore').textContent = highScore;
+}
+
+// --- Drawing functions ---
+
+function drawSky() {
+  const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  gradient.addColorStop(0, '#0d0221');
+  gradient.addColorStop(0.4, '#1a0a2e');
+  gradient.addColorStop(0.7, '#2d1052');
+  gradient.addColorStop(1, '#1a0a2e');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Stars
+  ctx.fillStyle = '#fff';
+  for (let i = 0; i < 50; i++) {
+    const sx = (i * 137.5 + frameCount * 0.1) % canvas.width;
+    const sy = (i * 97.3) % (canvas.height * 0.5);
+    const twinkle = 0.3 + 0.7 * Math.abs(Math.sin(frameCount * 0.02 + i));
+    ctx.globalAlpha = twinkle * 0.8;
+    ctx.fillRect(sx, sy, 2, 2);
+  }
+  ctx.globalAlpha = 1;
+
+  // Moon
+  const scale = getScale();
+  const moonX = canvas.width - 100 * scale;
+  const moonY = 70 * scale;
+  const moonR = 35 * scale;
+  const moonGlow = ctx.createRadialGradient(moonX, moonY, moonR * 0.5, moonX, moonY, moonR * 3);
+  moonGlow.addColorStop(0, 'rgba(255,200,100,0.3)');
+  moonGlow.addColorStop(1, 'rgba(255,200,100,0)');
+  ctx.fillStyle = moonGlow;
+  ctx.fillRect(moonX - moonR * 3, moonY - moonR * 3, moonR * 6, moonR * 6);
+  ctx.fillStyle = '#ffe4a0';
+  ctx.beginPath();
+  ctx.arc(moonX, moonY, moonR, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(255,220,150,0.5)';
+  ctx.beginPath();
+  ctx.arc(moonX - 8 * scale, moonY - 5 * scale, 8 * scale, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(moonX + 10 * scale, moonY + 8 * scale, 5 * scale, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawBgElements() {
+  bgElements.forEach(el => {
+    el.x -= el.speed;
+    el.sway += 0.02;
+    if (el.x < -50) {
+      el.x = canvas.width + 50;
+      el.y = 20 + Math.random() * (canvas.height * 0.3);
+    }
+    ctx.globalAlpha = el.alpha;
+    if (el.type === 'lantern') {
+      drawLantern(el.x + Math.sin(el.sway) * 5, el.y, el.size);
+    } else {
+      // Distant firework sparkle
+      const sparkleSize = el.size * (0.8 + 0.2 * Math.sin(frameCount * 0.1 + el.sway));
+      ctx.fillStyle = `hsl(${(frameCount * 2 + el.x) % 360}, 100%, 70%)`;
+      ctx.beginPath();
+      ctx.arc(el.x, el.y, sparkleSize * 0.3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  });
+}
+
+function drawLantern(x, y, size) {
+  // String
+  ctx.strokeStyle = '#8B4513';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(x, y - size);
+  ctx.lineTo(x, y - size * 0.5);
+  ctx.stroke();
+  // Body
+  ctx.fillStyle = '#ff2200';
+  ctx.beginPath();
+  ctx.ellipse(x, y, size * 0.5, size * 0.7, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Glow
+  ctx.fillStyle = 'rgba(255,100,0,0.3)';
+  ctx.beginPath();
+  ctx.ellipse(x, y, size * 0.8, size * 1, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Ribs
+  ctx.strokeStyle = '#cc0000';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(x, y - size * 0.7);
+  ctx.lineTo(x, y + size * 0.7);
+  ctx.stroke();
+  // Top/bottom caps
+  ctx.fillStyle = '#ffd700';
+  ctx.fillRect(x - size * 0.3, y - size * 0.7, size * 0.6, size * 0.15);
+  ctx.fillRect(x - size * 0.3, y + size * 0.55, size * 0.6, size * 0.15);
+  // Tassel
+  ctx.strokeStyle = '#ffd700';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(x, y + size * 0.7);
+  ctx.lineTo(x, y + size * 1.1);
+  ctx.stroke();
+}
+
+function drawGround() {
+  const scale = getScale();
+  // Main ground
+  ctx.fillStyle = '#2d1052';
+  ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
+
+  // Ground line
+  ctx.strokeStyle = '#ff6b35';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(0, groundY);
+  ctx.lineTo(canvas.width, groundY);
+  ctx.stroke();
+
+  // Decorative ground pattern
+  ctx.fillStyle = '#3d1872';
+  for (let x = -((frameCount * gameSpeed) % (40 * scale)); x < canvas.width; x += 40 * scale) {
+    ctx.fillRect(x, groundY + 5, 20 * scale, 3);
+  }
+
+  // Chinese pattern border
+  ctx.strokeStyle = '#ffd700';
+  ctx.lineWidth = 1;
+  ctx.globalAlpha = 0.3;
+  for (let x = -((frameCount * gameSpeed) % (30 * scale)); x < canvas.width; x += 30 * scale) {
+    ctx.beginPath();
+    ctx.moveTo(x, groundY + 15 * scale);
+    ctx.lineTo(x + 10 * scale, groundY + 15 * scale);
+    ctx.lineTo(x + 10 * scale, groundY + 25 * scale);
+    ctx.lineTo(x + 20 * scale, groundY + 25 * scale);
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawHorse() {
+  const x = horse.x;
+  const y = horse.y;
+  const w = horse.width;
+  const h = horse.height;
+  const scale = getScale();
+
+  // Animate legs
+  horse.animTimer++;
+  if (horse.animTimer > 5) {
+    horse.animTimer = 0;
+    horse.animFrame = (horse.animFrame + 1) % 4;
+  }
+
+  ctx.save();
+  ctx.translate(x, y);
+
+  // Shadow
+  if (!horse.isJumping) {
+    ctx.fillStyle = 'rgba(0,0,0,0.2)';
+    ctx.beginPath();
+    ctx.ellipse(w * 0.5, h + 3, w * 0.4, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+  } else {
+    // Shadow on ground when jumping
+    const shadowY = groundY - horse.y - y + h + 3;
+    ctx.fillStyle = 'rgba(0,0,0,0.1)';
+    ctx.beginPath();
+    ctx.ellipse(w * 0.5, h + 3 + (groundY - horse.height - y), w * 0.3, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Body
+  ctx.fillStyle = '#8B4513';
+  ctx.beginPath();
+  ctx.ellipse(w * 0.5, h * 0.5, w * 0.4, h * 0.3, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Darker underside
+  ctx.fillStyle = '#6B3410';
+  ctx.beginPath();
+  ctx.ellipse(w * 0.5, h * 0.6, w * 0.35, h * 0.15, 0, 0, Math.PI);
+  ctx.fill();
+
+  // Neck
+  ctx.fillStyle = '#8B4513';
+  ctx.beginPath();
+  ctx.moveTo(w * 0.75, h * 0.35);
+  ctx.quadraticCurveTo(w * 0.95, h * 0.1, w * 0.85, h * -0.1);
+  ctx.lineTo(w * 0.7, h * -0.05);
+  ctx.quadraticCurveTo(w * 0.65, h * 0.15, w * 0.65, h * 0.4);
+  ctx.fill();
+
+  // Head
+  ctx.fillStyle = '#7B3A10';
+  ctx.beginPath();
+  ctx.ellipse(w * 0.88, h * -0.1, w * 0.15, h * 0.12, 0.3, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Snout
+  ctx.fillStyle = '#9B5A30';
+  ctx.beginPath();
+  ctx.ellipse(w * 1.0, h * -0.05, w * 0.08, h * 0.07, 0.2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Eye
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.arc(w * 0.9, h * -0.14, 3 * scale, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.arc(w * 0.91, h * -0.15, 1.2 * scale, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Ear
+  ctx.fillStyle = '#7B3A10';
+  ctx.beginPath();
+  ctx.moveTo(w * 0.82, h * -0.22);
+  ctx.lineTo(w * 0.78, h * -0.38);
+  ctx.lineTo(w * 0.86, h * -0.25);
+  ctx.fill();
+
+  // Mane (flowing red for Lunar New Year)
+  ctx.fillStyle = '#ff2200';
+  for (let i = 0; i < 6; i++) {
+    const mx = w * 0.75 - i * w * 0.04;
+    const my = h * -0.08 + i * h * 0.08;
+    const wave = Math.sin(frameCount * 0.15 + i) * 3 * scale;
+    ctx.beginPath();
+    ctx.ellipse(mx + wave, my, w * 0.06, h * 0.06, -0.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Decorative saddle (gold, festive)
+  ctx.fillStyle = '#ffd700';
+  ctx.beginPath();
+  ctx.ellipse(w * 0.5, h * 0.35, w * 0.18, h * 0.12, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#ff2200';
+  ctx.beginPath();
+  ctx.ellipse(w * 0.5, h * 0.35, w * 0.12, h * 0.06, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Tail (red ribbon style)
+  ctx.strokeStyle = '#ff2200';
+  ctx.lineWidth = 3 * scale;
+  ctx.lineCap = 'round';
+  const tailWave = Math.sin(frameCount * 0.1) * 8 * scale;
+  ctx.beginPath();
+  ctx.moveTo(w * 0.1, h * 0.35);
+  ctx.quadraticCurveTo(w * -0.1 + tailWave, h * 0.1, w * -0.15 + tailWave * 1.5, h * 0.0);
+  ctx.stroke();
+  ctx.lineWidth = 2 * scale;
+  ctx.beginPath();
+  ctx.moveTo(w * 0.1, h * 0.38);
+  ctx.quadraticCurveTo(w * -0.08 + tailWave, h * 0.25, w * -0.2 + tailWave * 1.3, h * 0.15);
+  ctx.stroke();
+
+  // Legs
+  ctx.fillStyle = '#6B3410';
+  const legPositions = [
+    { x: w * 0.25, back: true },
+    { x: w * 0.35, back: true },
+    { x: w * 0.6, back: false },
+    { x: w * 0.7, back: false },
+  ];
+
+  legPositions.forEach((leg, i) => {
+    let legAngle = 0;
+    if (!horse.isJumping) {
+      const phase = i % 2 === 0 ? 0 : Math.PI;
+      legAngle = Math.sin(frameCount * 0.2 + phase) * 0.4;
+    } else {
+      legAngle = i < 2 ? 0.3 : -0.3;
+    }
+    ctx.save();
+    ctx.translate(leg.x, h * 0.65);
+    ctx.rotate(legAngle);
+    // Upper leg
+    ctx.fillRect(-3 * scale, 0, 6 * scale, h * 0.25);
+    // Lower leg
+    ctx.translate(0, h * 0.25);
+    ctx.rotate(horse.isJumping ? -0.2 : Math.max(0, legAngle * 0.5));
+    ctx.fillRect(-2.5 * scale, 0, 5 * scale, h * 0.2);
+    // Hoof
+    ctx.fillStyle = '#333';
+    ctx.fillRect(-3.5 * scale, h * 0.18, 7 * scale, 4 * scale);
+    ctx.fillStyle = '#6B3410';
+    ctx.restore();
+  });
+
+  // Lucky red ribbon
+  ctx.fillStyle = '#ff0000';
+  ctx.globalAlpha = 0.8;
+  const ribbonWave = Math.sin(frameCount * 0.12) * 4 * scale;
+  ctx.beginPath();
+  ctx.moveTo(w * 0.5, h * 0.25);
+  ctx.quadraticCurveTo(w * 0.3 + ribbonWave, h * 0.1, w * 0.15, h * 0.2 + ribbonWave);
+  ctx.lineWidth = 2 * scale;
+  ctx.strokeStyle = '#ff0000';
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  ctx.restore();
+}
+
+function spawnObstacle() {
+  const scale = getScale();
+  const types = Object.values(OBSTACLE_TYPES);
+  const type = types[Math.floor(Math.random() * types.length)];
+
+  let obs = {
+    x: canvas.width + 50,
+    type: type,
+    passed: false,
+  };
+
+  switch (type) {
+    case OBSTACLE_TYPES.FIRECRACKER:
+      obs.width = 25 * scale;
+      obs.height = 55 * scale;
+      obs.y = groundY - obs.height;
+      break;
+    case OBSTACLE_TYPES.DRUM:
+      obs.width = 45 * scale;
+      obs.height = 40 * scale;
+      obs.y = groundY - obs.height;
+      break;
+    case OBSTACLE_TYPES.LION:
+      obs.width = 50 * scale;
+      obs.height = 45 * scale;
+      obs.y = groundY - obs.height;
+      break;
+    case OBSTACLE_TYPES.LANTERN_LOW:
+      obs.width = 30 * scale;
+      obs.height = 35 * scale;
+      obs.y = groundY - obs.height - 10 * scale;
+      break;
+  }
+
+  obstacles.push(obs);
+}
+
+function spawnCoin() {
+  const scale = getScale();
+  coins.push({
+    x: canvas.width + 50,
+    y: groundY - (60 + Math.random() * 80) * scale,
+    size: 12 * scale,
+    collected: false,
+    shimmer: Math.random() * Math.PI * 2,
+  });
+}
+
+function drawObstacle(obs) {
+  const scale = getScale();
+  ctx.save();
+  ctx.translate(obs.x, obs.y);
+
+  switch (obs.type) {
+    case OBSTACLE_TYPES.FIRECRACKER:
+      // Firecracker body
+      ctx.fillStyle = '#ff0000';
+      ctx.fillRect(obs.width * 0.2, obs.height * 0.15, obs.width * 0.6, obs.height * 0.8);
+      // Gold bands
+      ctx.fillStyle = '#ffd700';
+      ctx.fillRect(obs.width * 0.15, obs.height * 0.15, obs.width * 0.7, obs.height * 0.08);
+      ctx.fillRect(obs.width * 0.15, obs.height * 0.85, obs.width * 0.7, obs.height * 0.08);
+      ctx.fillRect(obs.width * 0.15, obs.height * 0.5, obs.width * 0.7, obs.height * 0.08);
+      // Fuse
+      ctx.strokeStyle = '#8B4513';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(obs.width * 0.5, obs.height * 0.15);
+      const fuseWave = Math.sin(frameCount * 0.3) * 3 * scale;
+      ctx.quadraticCurveTo(obs.width * 0.5 + fuseWave, -5 * scale, obs.width * 0.5 + fuseWave * 2, -10 * scale);
+      ctx.stroke();
+      // Spark
+      if (frameCount % 4 < 2) {
+        ctx.fillStyle = '#ffff00';
+        ctx.beginPath();
+        ctx.arc(obs.width * 0.5 + fuseWave * 2, -12 * scale, 4 * scale, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // Chinese character "福" (fortune)
+      ctx.fillStyle = '#ffd700';
+      ctx.font = `bold ${14 * scale}px serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText('福', obs.width * 0.5, obs.height * 0.68);
+      break;
+
+    case OBSTACLE_TYPES.DRUM:
+      // Drum body
+      ctx.fillStyle = '#cc0000';
+      ctx.beginPath();
+      ctx.ellipse(obs.width * 0.5, obs.height * 0.5, obs.width * 0.5, obs.height * 0.4, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Drum face
+      ctx.fillStyle = '#ffcc80';
+      ctx.beginPath();
+      ctx.ellipse(obs.width * 0.5, obs.height * 0.5, obs.width * 0.35, obs.height * 0.25, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Gold trim
+      ctx.strokeStyle = '#ffd700';
+      ctx.lineWidth = 3 * scale;
+      ctx.beginPath();
+      ctx.ellipse(obs.width * 0.5, obs.height * 0.5, obs.width * 0.5, obs.height * 0.4, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      // Drum nails
+      ctx.fillStyle = '#ffd700';
+      for (let a = 0; a < Math.PI * 2; a += Math.PI / 6) {
+        ctx.beginPath();
+        ctx.arc(
+          obs.width * 0.5 + Math.cos(a) * obs.width * 0.45,
+          obs.height * 0.5 + Math.sin(a) * obs.height * 0.35,
+          2 * scale, 0, Math.PI * 2
+        );
+        ctx.fill();
+      }
+      // Dragon symbol
+      ctx.fillStyle = '#ffd700';
+      ctx.font = `bold ${16 * scale}px serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText('龍', obs.width * 0.5, obs.height * 0.58);
+      break;
+
+    case OBSTACLE_TYPES.LION:
+      // Lion dance head
+      ctx.fillStyle = '#ff4400';
+      ctx.beginPath();
+      ctx.ellipse(obs.width * 0.5, obs.height * 0.5, obs.width * 0.48, obs.height * 0.45, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // White trim
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.ellipse(obs.width * 0.5, obs.height * 0.3, obs.width * 0.4, obs.height * 0.15, 0, 0, Math.PI);
+      ctx.fill();
+      // Eyes
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(obs.width * 0.32, obs.height * 0.35, 7 * scale, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(obs.width * 0.68, obs.height * 0.35, 7 * scale, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#000';
+      ctx.beginPath();
+      ctx.arc(obs.width * 0.34, obs.height * 0.35, 3.5 * scale, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(obs.width * 0.7, obs.height * 0.35, 3.5 * scale, 0, Math.PI * 2);
+      ctx.fill();
+      // Mouth
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(obs.width * 0.2, obs.height * 0.65, obs.width * 0.6, obs.height * 0.15);
+      // Teeth
+      ctx.fillStyle = '#ff4400';
+      for (let t = 0; t < 4; t++) {
+        ctx.fillRect(obs.width * 0.25 + t * obs.width * 0.14, obs.height * 0.65, obs.width * 0.05, obs.height * 0.08);
+      }
+      // Horn/decoration
+      ctx.fillStyle = '#ffd700';
+      ctx.beginPath();
+      ctx.moveTo(obs.width * 0.5, obs.height * -0.05);
+      ctx.lineTo(obs.width * 0.35, obs.height * 0.15);
+      ctx.lineTo(obs.width * 0.65, obs.height * 0.15);
+      ctx.fill();
+      // Fur tufts
+      ctx.fillStyle = '#fff';
+      for (let f = 0; f < 5; f++) {
+        const angle = (f / 5) * Math.PI + Math.PI;
+        ctx.beginPath();
+        ctx.arc(
+          obs.width * 0.5 + Math.cos(angle) * obs.width * 0.5,
+          obs.height * 0.5 + Math.sin(angle) * obs.height * 0.45,
+          4 * scale, 0, Math.PI * 2
+        );
+        ctx.fill();
+      }
+      break;
+
+    case OBSTACLE_TYPES.LANTERN_LOW:
+      drawLantern(obs.width * 0.5, obs.height * 0.5, obs.width * 0.5);
+      // Post
+      ctx.fillStyle = '#8B4513';
+      ctx.fillRect(obs.width * 0.45, obs.height * 0.9, obs.width * 0.1, obs.height * 0.3);
+      break;
+  }
+
+  ctx.restore();
+}
+
+function drawCoin(coin) {
+  if (coin.collected) return;
+  const scale = getScale();
+  ctx.save();
+  ctx.translate(coin.x, coin.y);
+
+  coin.shimmer += 0.08;
+
+  // Glow
+  ctx.fillStyle = 'rgba(255,215,0,0.2)';
+  ctx.beginPath();
+  ctx.arc(0, 0, coin.size * 1.8, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Coin body
+  ctx.fillStyle = '#ffd700';
+  ctx.beginPath();
+  ctx.arc(0, 0, coin.size, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Inner ring
+  ctx.strokeStyle = '#cc9900';
+  ctx.lineWidth = 2 * scale;
+  ctx.beginPath();
+  ctx.arc(0, 0, coin.size * 0.65, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Square hole
+  ctx.fillStyle = '#cc9900';
+  const holeSize = coin.size * 0.3;
+  ctx.fillRect(-holeSize, -holeSize, holeSize * 2, holeSize * 2);
+
+  // Shimmer effect
+  ctx.globalAlpha = 0.3 + 0.3 * Math.sin(coin.shimmer);
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.arc(-coin.size * 0.2, -coin.size * 0.2, coin.size * 0.3, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  ctx.restore();
+}
+
+function drawParticles() {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.1;
+    p.life -= 0.02;
+    if (p.life <= 0) {
+      particles.splice(i, 1);
+      continue;
+    }
+    ctx.globalAlpha = p.life;
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+}
+
+function createCoinParticles(x, y) {
+  const scale = getScale();
+  for (let i = 0; i < 12; i++) {
+    particles.push({
+      x, y,
+      vx: (Math.random() - 0.5) * 6 * scale,
+      vy: (Math.random() - 1) * 5 * scale,
+      size: (2 + Math.random() * 3) * scale,
+      color: Math.random() > 0.5 ? '#ffd700' : '#ff6600',
+      life: 1,
+    });
+  }
+}
+
+function createHitParticles(x, y) {
+  const scale = getScale();
+  for (let i = 0; i < 20; i++) {
+    particles.push({
+      x, y,
+      vx: (Math.random() - 0.5) * 8 * scale,
+      vy: (Math.random() - 0.5) * 8 * scale,
+      size: (2 + Math.random() * 4) * scale,
+      color: ['#ff0000', '#ffd700', '#ff6600', '#fff'][Math.floor(Math.random() * 4)],
+      life: 1,
+    });
+  }
+}
+
+// Collision detection with smaller hitbox for fairness
+function checkCollision(a, obs) {
+  const padding = getScale() * 8;
+  return (
+    a.x + padding < obs.x + obs.width - padding &&
+    a.x + a.width - padding > obs.x + padding &&
+    a.y + padding < obs.y + obs.height - padding &&
+    a.y + a.height - padding > obs.y + padding
+  );
+}
+
+function jump() {
+  if (gameState !== 'playing') return;
+  if (!horse.isJumping) {
+    horse.isJumping = true;
+    horse.velocityY = horse.jumpForce;
+    sfxJump();
+  }
+}
+
+function updateGame() {
+  if (gameState !== 'playing') return;
+
+  frameCount++;
+  const scale = getScale();
+
+  // Increase speed over time
+  gameSpeed = (5 + Math.floor(score / 100) * 0.5) * scale;
+
+  // Update horse
+  horse.velocityY += horse.gravity;
+  horse.y += horse.velocityY;
+
+  if (horse.y >= groundY - horse.height) {
+    horse.y = groundY - horse.height;
+    horse.velocityY = 0;
+    horse.isJumping = false;
+  }
+
+  // Spawn obstacles
+  const minGap = Math.max(80, 120 - score / 20);
+  if (frameCount % Math.floor(minGap) === 0) {
+    spawnObstacle();
+  }
+
+  // Spawn coins
+  if (frameCount % 90 === 45) {
+    spawnCoin();
+  }
+
+  // Update obstacles
+  for (let i = obstacles.length - 1; i >= 0; i--) {
+    obstacles[i].x -= gameSpeed;
+
+    if (!obstacles[i].passed && obstacles[i].x + obstacles[i].width < horse.x) {
+      obstacles[i].passed = true;
+      const prevScore = score;
+      score += 10;
+      document.getElementById('score').textContent = score;
+      sfxScore();
+      // Milestone fanfare every 100 points
+      if (Math.floor(score / 100) > Math.floor(prevScore / 100)) {
+        sfxMilestone();
+      }
+    }
+
+    if (checkCollision(horse, obstacles[i])) {
+      gameState = 'over';
+      stopMusic();
+      sfxGameOver();
+      createHitParticles(horse.x + horse.width / 2, horse.y + horse.height / 2);
+      if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('lunarHorseHighScore', highScore.toString());
+      }
+      document.getElementById('finalScore').textContent = score;
+      document.getElementById('finalHighScore').textContent = highScore;
+      document.getElementById('gameOverScreen').style.display = 'flex';
+      document.getElementById('scoreDisplay').style.display = 'none';
+      document.getElementById('highScoreDisplay').style.display = 'none';
+      return;
+    }
+
+    if (obstacles[i].x < -100) {
+      obstacles.splice(i, 1);
+    }
+  }
+
+  // Update coins
+  for (let i = coins.length - 1; i >= 0; i--) {
+    coins[i].x -= gameSpeed;
+
+    if (!coins[i].collected) {
+      const dx = (horse.x + horse.width / 2) - coins[i].x;
+      const dy = (horse.y + horse.height / 2) - coins[i].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < horse.width * 0.5 + coins[i].size) {
+        coins[i].collected = true;
+        const prevScore = score;
+        score += 25;
+        document.getElementById('score').textContent = score;
+        createCoinParticles(coins[i].x, coins[i].y);
+        sfxCoin();
+        if (Math.floor(score / 100) > Math.floor(prevScore / 100)) {
+          sfxMilestone();
+        }
+      }
+    }
+
+    if (coins[i].x < -50) {
+      coins.splice(i, 1);
+    }
+  }
+}
+
+function gameLoop(timestamp) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  drawSky();
+  drawBgElements();
+  drawGround();
+
+  if (gameState === 'playing' || gameState === 'over') {
+    obstacles.forEach(drawObstacle);
+    coins.forEach(drawCoin);
+    drawHorse();
+    drawParticles();
+    updateGame();
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+// Event listeners
+function showTapHint() {
+  const isMob = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    || ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+  if (isMob) {
+    const hint = document.getElementById('tapHint');
+    hint.style.display = 'block';
+    hint.style.animation = 'none';
+    // Force reflow to restart the animation
+    void hint.offsetWidth;
+    hint.style.animation = 'fadeInOut 3s ease-in-out forwards';
+  }
+}
+
+function startGame() {
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('gameOverScreen').style.display = 'none';
+  document.getElementById('scoreDisplay').style.display = 'block';
+  document.getElementById('highScoreDisplay').style.display = 'block';
+  initAudio();
+  initGame();
+  gameState = 'playing';
+  startMusic();
+  showTapHint();
+}
+
+function restartGame() {
+  document.getElementById('gameOverScreen').style.display = 'none';
+  document.getElementById('scoreDisplay').style.display = 'block';
+  document.getElementById('highScoreDisplay').style.display = 'block';
+  initAudio();
+  initGame();
+  gameState = 'playing';
+  startMusic();
+  showTapHint();
+}
+
+// Keyboard
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space' || e.code === 'ArrowUp') {
+    e.preventDefault();
+    if (gameState === 'start') {
+      startGame();
+    } else if (gameState === 'playing') {
+      jump();
+    } else if (gameState === 'over') {
+      restartGame();
+    }
+  }
+});
+
+// Touch (mobile) — tap anywhere to jump
+document.addEventListener('touchstart', (e) => {
+  // Don't handle touch on buttons or mute btn
+  if (e.target.tagName === 'BUTTON' || e.target.id === 'muteBtn' || e.target.closest('#muteBtn')) return;
+  e.preventDefault();
+  if (gameState === 'playing') {
+    jump();
+  } else if (gameState === 'over') {
+    restartGame();
+  }
+}, { passive: false });
+
+// Mouse click on canvas (desktop)
+canvas.addEventListener('click', (e) => {
+  if (gameState === 'playing') {
+    jump();
+  }
+});
+
+// Buttons
+document.getElementById('startBtn').addEventListener('click', startGame);
+document.getElementById('restartBtn').addEventListener('click', restartGame);
+
+// Handle resize
+window.addEventListener('resize', () => {
+  resizeCanvas();
+  if (gameState === 'playing') {
+    const scale = getScale();
+    groundY = canvas.height - 60 * scale;
+    horse.width = 60 * scale;
+    horse.height = 55 * scale;
+    horse.jumpForce = -14 * scale;
+    horse.gravity = 0.65 * scale;
+    if (!horse.isJumping) {
+      horse.y = groundY - horse.height;
+    }
+  }
+});
+
+// Detect mobile and adapt instructions
+const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  || ('ontouchstart' in window)
+  || (navigator.maxTouchPoints > 0);
+
+if (isMobile) {
+  document.getElementById('controlsHint').innerHTML =
+    '<b>TAP</b> anywhere to jump!<br>Dodge the obstacles &amp; grab lucky coins!';
+}
+
+// Update high score display
+document.getElementById('highScore').textContent = highScore;
+
+// Start render loop
+requestAnimationFrame(gameLoop);
+</script>
+</body>
+</html>
