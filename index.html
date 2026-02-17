@@ -154,53 +154,7 @@
     flex-shrink: 0;
   }
 
-  /* Compact layout for landscape mobile */
-  @media (orientation: landscape) and (max-height: 450px) {
-    #startScreen {
-      flex-direction: column;
-      padding: 8px 0;
-    }
-    #startScreen .horse-art {
-      font-size: 36px;
-      margin-bottom: 2px;
-    }
-    #startScreen h1 {
-      font-size: clamp(18px, 4vw, 30px);
-      margin-bottom: 2px;
-    }
-    #startScreen .subtitle {
-      font-size: clamp(12px, 2vw, 18px);
-      margin-bottom: 6px;
-    }
-    #startScreen .instructions {
-      font-size: 12px;
-      margin-bottom: 5px;
-      line-height: 1.2;
-    }
-    #startScreen .obstacles-info {
-      gap: 5px;
-      margin-bottom: 5px;
-    }
-    #startScreen .obstacle-item {
-      padding: 3px 8px;
-      min-width: 50px;
-    }
-    #startScreen .obstacle-item .obs-icon {
-      font-size: 16px;
-      margin-bottom: 1px;
-    }
-    #startScreen .obstacle-item .obs-label {
-      font-size: 9px;
-    }
-    #startScreen .coin-hint {
-      font-size: 11px;
-      margin-bottom: 5px;
-    }
-    #startBtn {
-      padding: 8px 30px;
-      font-size: 15px;
-    }
-  }
+  /* No landscape compact layout needed — portrait only */
 
   @keyframes pulse {
     0%, 100% { box-shadow: 0 0 20px rgba(255,107,53,0.5); }
@@ -346,14 +300,14 @@
     50% { transform: rotate(5deg); }
   }
 
-  /* Landscape suggestion overlay for portrait mobile */
+  /* Landscape blocker — portrait only game */
   #landscapeHint {
     display: none;
     position: absolute;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    z-index: 50;
-    background: rgba(13, 2, 33, 0.95);
+    z-index: 100;
+    background: linear-gradient(180deg, #1a0a2e 0%, #2d1052 50%, #1a0a2e 100%);
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -368,8 +322,8 @@
   }
 
   @keyframes rotatePhone {
-    0%, 100% { transform: rotate(0deg); }
-    50% { transform: rotate(90deg); }
+    0%, 100% { transform: rotate(90deg); }
+    50% { transform: rotate(0deg); }
   }
 
   #landscapeHint .hint-title {
@@ -383,23 +337,11 @@
   #landscapeHint .hint-text {
     color: #ffcc80;
     font-size: 16px;
-    margin-bottom: 25px;
     line-height: 1.5;
   }
 
-  #dismissLandscapeBtn {
-    background: linear-gradient(135deg, #ff6b35, #d4380d);
-    color: #fff;
-    border: 2px solid #ffd700;
-    padding: 12px 35px;
-    font-size: 16px;
-    border-radius: 50px;
-    cursor: pointer;
-    box-shadow: 0 0 15px rgba(255,107,53,0.4);
-  }
-
-  @media (orientation: portrait) and (max-width: 768px) {
-    #landscapeHint.show-hint {
+  @media (orientation: landscape) and (max-height: 500px) {
+    #landscapeHint {
       display: flex;
     }
   }
@@ -409,12 +351,11 @@
 <div id="gameContainer">
   <canvas id="gameCanvas"></canvas>
 
-  <!-- Landscape suggestion for portrait mobile -->
+  <!-- Landscape blocker — portrait only -->
   <div id="landscapeHint">
     <div class="rotate-icon">📱</div>
-    <div class="hint-title">Rotate Your Phone!</div>
-    <div class="hint-text">This game plays best in landscape mode.<br>Rotate for the full experience! 🐴🏮</div>
-    <button id="dismissLandscapeBtn">Play in Portrait Anyway</button>
+    <div class="hint-title">Please Rotate Your Phone</div>
+    <div class="hint-text">🐴 This game is designed for portrait mode 🏮<br>Turn your phone upright to play!</div>
   </div>
 
   <button id="muteBtn" title="Toggle Sound">🔊</button>
@@ -472,18 +413,10 @@ function resizeCanvas() {
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
-// Game constants (responsive)
-function isPortrait() {
-  return canvas.height > canvas.width;
-}
-
+// Game constants (responsive — portrait mode)
 function getScale() {
-  if (isPortrait()) {
-    // In portrait: scale based on width so everything fits horizontally,
-    // but ensure a minimum size so horse/obstacles are visible
-    return Math.max(0.6, Math.min(canvas.width / 500, 1.5));
-  }
-  return Math.min(canvas.width / 800, canvas.height / 400, 1.5);
+  // Scale based on screen width so everything fits horizontally
+  return Math.max(0.6, Math.min(canvas.width / 500, 1.5));
 }
 
 // ==================== AUDIO ENGINE ====================
@@ -823,12 +756,8 @@ const OBSTACLE_TYPES = {
 
 function initGame() {
   const scale = getScale();
-  // In portrait: place ground in the lower third; in landscape: near bottom
-  if (isPortrait()) {
-    groundY = canvas.height * 0.72;
-  } else {
-    groundY = canvas.height - 60 * scale;
-  }
+  // Place ground at ~72% of screen height — works well in portrait
+  groundY = Math.min(canvas.height * 0.72, canvas.height - 60 * scale);
 
   horse.width = 60 * scale;
   horse.height = 55 * scale;
@@ -1692,11 +1621,7 @@ window.addEventListener('resize', () => {
   resizeCanvas();
   if (gameState === 'playing') {
     const scale = getScale();
-    if (isPortrait()) {
-      groundY = canvas.height * 0.72;
-    } else {
-      groundY = canvas.height - 60 * scale;
-    }
+    groundY = Math.min(canvas.height * 0.72, canvas.height - 60 * scale);
     horse.width = 60 * scale;
     horse.height = 55 * scale;
     horse.jumpForce = -14 * scale;
@@ -1717,32 +1642,7 @@ if (isMobile) {
     '<b>TAP</b> anywhere to jump!<br>Dodge the obstacles &amp; grab lucky coins!';
 }
 
-// Landscape hint for portrait mobile
-let landscapeDismissed = false;
-const landscapeHint = document.getElementById('landscapeHint');
-
-function checkOrientation() {
-  if (!isMobile || landscapeDismissed) return;
-  if (window.innerHeight > window.innerWidth) {
-    landscapeHint.classList.add('show-hint');
-  } else {
-    landscapeHint.classList.remove('show-hint');
-  }
-}
-
-document.getElementById('dismissLandscapeBtn').addEventListener('click', (e) => {
-  e.stopPropagation();
-  landscapeDismissed = true;
-  landscapeHint.classList.remove('show-hint');
-});
-
-// Also add touchstart handler on dismiss button to prevent jump
-document.getElementById('dismissLandscapeBtn').addEventListener('touchstart', (e) => {
-  e.stopPropagation();
-});
-
-checkOrientation();
-window.addEventListener('resize', checkOrientation);
+// Landscape blocker is handled purely by CSS media query — no JS needed
 
 // Update high score display
 document.getElementById('highScore').textContent = highScore;
