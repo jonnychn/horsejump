@@ -42,31 +42,45 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: safe center;
     z-index: 10;
     background: linear-gradient(180deg, #1a0a2e 0%, #2d1052 50%, #1a0a2e 100%);
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding: 15px 0;
+  }
+
+  /* Spacer to help center content when there's room, collapse when there isn't */
+  #startScreen::before,
+  #startScreen::after {
+    content: '';
+    flex: 1 0 0px;
   }
 
   #startScreen h1 {
     color: #ffd700;
-    font-size: clamp(28px, 6vw, 56px);
+    font-size: clamp(22px, 6vw, 56px);
     text-align: center;
     text-shadow: 0 0 20px #ff6600, 0 0 40px #ff3300;
-    margin-bottom: 10px;
+    margin-bottom: clamp(4px, 1vh, 10px);
     line-height: 1.2;
+    flex-shrink: 0;
   }
 
   #startScreen .subtitle {
     color: #ff6b35;
-    font-size: clamp(16px, 3vw, 28px);
-    margin-bottom: 30px;
+    font-size: clamp(14px, 3vw, 28px);
+    margin-bottom: clamp(8px, 2vh, 30px);
     text-shadow: 0 0 10px #ff6600;
+    flex-shrink: 0;
   }
 
   #startScreen .horse-art {
-    font-size: clamp(60px, 15vw, 120px);
-    margin-bottom: 20px;
+    font-size: clamp(40px, 12vw, 120px);
+    margin-bottom: clamp(5px, 1.5vh, 20px);
     animation: bounce 1.5s ease-in-out infinite;
+    flex-shrink: 0;
   }
 
   @keyframes bounce {
@@ -76,21 +90,23 @@
 
   #startScreen .instructions {
     color: #ffcc80;
-    font-size: clamp(14px, 2.5vw, 20px);
+    font-size: clamp(13px, 2.5vw, 20px);
     text-align: center;
-    margin-bottom: 20px;
-    line-height: 1.6;
+    margin-bottom: clamp(6px, 1.5vh, 20px);
+    line-height: 1.4;
     padding: 0 20px;
+    flex-shrink: 0;
   }
 
   #startScreen .obstacles-info {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: clamp(8px, 2vw, 16px);
-    margin-bottom: 25px;
+    gap: clamp(6px, 1.5vw, 16px);
+    margin-bottom: clamp(6px, 1.5vh, 25px);
     padding: 0 15px;
     max-width: 500px;
+    flex-shrink: 0;
   }
 
   #startScreen .obstacle-item {
@@ -100,40 +116,90 @@
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,215,0,0.25);
     border-radius: 12px;
-    padding: clamp(6px, 1.5vw, 12px) clamp(10px, 2vw, 18px);
-    min-width: clamp(65px, 15vw, 95px);
+    padding: clamp(4px, 1vh, 12px) clamp(8px, 1.5vw, 18px);
+    min-width: clamp(55px, 12vw, 95px);
   }
 
   #startScreen .obstacle-item .obs-icon {
-    font-size: clamp(22px, 5vw, 36px);
-    margin-bottom: 4px;
+    font-size: clamp(18px, 4vw, 36px);
+    margin-bottom: 2px;
   }
 
   #startScreen .obstacle-item .obs-label {
     color: #ffcc80;
-    font-size: clamp(10px, 1.8vw, 13px);
+    font-size: clamp(9px, 1.5vw, 13px);
     white-space: nowrap;
   }
 
   #startScreen .coin-hint {
     color: #ffd700;
-    font-size: clamp(12px, 2.2vw, 16px);
-    margin-bottom: 20px;
+    font-size: clamp(11px, 2vw, 16px);
+    margin-bottom: clamp(8px, 1.5vh, 20px);
     text-shadow: 0 0 8px rgba(255,215,0,0.4);
+    flex-shrink: 0;
   }
 
   #startBtn {
     background: linear-gradient(135deg, #ff6b35, #d4380d);
     color: #fff;
     border: 3px solid #ffd700;
-    padding: 15px 50px;
-    font-size: clamp(18px, 3vw, 26px);
+    padding: clamp(10px, 2vh, 15px) clamp(30px, 6vw, 50px);
+    font-size: clamp(16px, 3vw, 26px);
     border-radius: 50px;
     cursor: pointer;
     text-shadow: 0 2px 4px rgba(0,0,0,0.5);
     box-shadow: 0 0 20px rgba(255,107,53,0.5), 0 5px 15px rgba(0,0,0,0.3);
     transition: transform 0.2s, box-shadow 0.2s;
     animation: pulse 2s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+  /* Compact layout for landscape mobile */
+  @media (orientation: landscape) and (max-height: 450px) {
+    #startScreen {
+      flex-direction: column;
+      padding: 8px 0;
+    }
+    #startScreen .horse-art {
+      font-size: 36px;
+      margin-bottom: 2px;
+    }
+    #startScreen h1 {
+      font-size: clamp(18px, 4vw, 30px);
+      margin-bottom: 2px;
+    }
+    #startScreen .subtitle {
+      font-size: clamp(12px, 2vw, 18px);
+      margin-bottom: 6px;
+    }
+    #startScreen .instructions {
+      font-size: 12px;
+      margin-bottom: 5px;
+      line-height: 1.2;
+    }
+    #startScreen .obstacles-info {
+      gap: 5px;
+      margin-bottom: 5px;
+    }
+    #startScreen .obstacle-item {
+      padding: 3px 8px;
+      min-width: 50px;
+    }
+    #startScreen .obstacle-item .obs-icon {
+      font-size: 16px;
+      margin-bottom: 1px;
+    }
+    #startScreen .obstacle-item .obs-label {
+      font-size: 9px;
+    }
+    #startScreen .coin-hint {
+      font-size: 11px;
+      margin-bottom: 5px;
+    }
+    #startBtn {
+      padding: 8px 30px;
+      font-size: 15px;
+    }
   }
 
   @keyframes pulse {
@@ -152,39 +218,52 @@
     display: none;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: safe center;
     z-index: 10;
     background: rgba(26, 10, 46, 0.9);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 15px 0;
+  }
+
+  #gameOverScreen::before,
+  #gameOverScreen::after {
+    content: '';
+    flex: 1 0 0px;
   }
 
   #gameOverScreen h2 {
     color: #ff4444;
-    font-size: clamp(32px, 7vw, 60px);
+    font-size: clamp(24px, 7vw, 60px);
     text-shadow: 0 0 20px #ff0000;
-    margin-bottom: 10px;
+    margin-bottom: clamp(5px, 1.5vh, 10px);
+    flex-shrink: 0;
   }
 
   #gameOverScreen .final-score {
     color: #ffd700;
-    font-size: clamp(22px, 4vw, 40px);
-    margin-bottom: 10px;
+    font-size: clamp(18px, 4vw, 40px);
+    margin-bottom: clamp(5px, 1vh, 10px);
+    flex-shrink: 0;
   }
 
   #gameOverScreen .high-score {
     color: #ffcc80;
-    font-size: clamp(16px, 3vw, 24px);
-    margin-bottom: 30px;
+    font-size: clamp(14px, 3vw, 24px);
+    margin-bottom: clamp(10px, 2vh, 30px);
+    flex-shrink: 0;
   }
 
   #restartBtn {
     background: linear-gradient(135deg, #ff6b35, #d4380d);
     color: #fff;
     border: 3px solid #ffd700;
-    padding: 15px 50px;
-    font-size: clamp(18px, 3vw, 26px);
+    padding: clamp(10px, 2vh, 15px) clamp(30px, 6vw, 50px);
+    font-size: clamp(16px, 3vw, 26px);
     border-radius: 50px;
     cursor: pointer;
     box-shadow: 0 0 20px rgba(255,107,53,0.5);
+    flex-shrink: 0;
   }
 
   #scoreDisplay {
